@@ -29,10 +29,10 @@ import com.example.finalproject092.ui.topAppBar.HomeTopBar
 
 @Composable
 fun HomeView(
-    onTambahSplrClick: () -> Unit = {},
-    onDaftarSuplierClick: () -> Unit = {},
     onAnggotaClick: () -> Unit = {},
     onManageBookClick: () -> Unit = {},
+    onPinjamClick: () -> Unit = {},
+    onKembaliClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -43,9 +43,9 @@ fun HomeView(
 
     ) { innerPadding ->
         BodyHomeView(
-            onAddSuplierClick = {onTambahSplrClick()},
             onMembersClick = {onAnggotaClick()},
-            onSuplierListClick = {onDaftarSuplierClick()},
+            onBorrowClick = {onPinjamClick()},
+            onReturnClick = {onKembaliClick()},
             onBookClick = {onManageBookClick()},
             modifier = modifier.padding(innerPadding)
         )
@@ -58,8 +58,8 @@ fun HomeView(
 fun BodyHomeView(
     onBookClick: () -> Unit = {},
     onMembersClick: () -> Unit = {},
-    onSuplierListClick: () -> Unit = {},
-    onAddSuplierClick: () -> Unit = {},
+    onBorrowClick: () -> Unit = {},
+    onReturnClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(modifier = Modifier
@@ -135,7 +135,7 @@ fun BodyHomeView(
                 .padding(top = 200.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20 .dp)) {
                 ElevatedCard(
-                    onClick = onSuplierListClick,
+                    onClick = onBorrowClick,
                     modifier = modifier
                         .padding(5.dp)
                         .size(165.dp)
@@ -164,7 +164,7 @@ fun BodyHomeView(
                 }
 
                 ElevatedCard(
-                    onClick = onAddSuplierClick,
+                    onClick = onReturnClick,
                     modifier = modifier
                         .padding(5.dp)
                         .size(165.dp)
