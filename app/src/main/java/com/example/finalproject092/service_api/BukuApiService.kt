@@ -20,14 +20,14 @@ interface BukuApiService {
     suspend fun getAllBuku(): List<Buku>
 
     @GET("get1Buku.php")
-    suspend fun  getBukubyId(@Query("idBuku") idBuku: Int): Buku
+    suspend fun  getBukubyId(@Query("id_buku") idBuku: Int): Buku
 
     @POST("insertBuku.php")
     suspend fun insertBuku(@Body buku: Buku)
 
     @PUT("updateBuku.php/{id_buku}")
-    suspend fun updateBuku(@Query("idBuku") idBuku: Int, @Body buku: Buku)
+    suspend fun updateBuku(@Query("id_buku") idBuku: Int, @Body buku: Buku)
 
-    @DELETE("deleteBuku.php/{idBuku}")
-    suspend fun deleteBuku(@Query("idBuku") idBuku: Int): Response<Void>
+    @DELETE("deleteBuku.php/{id_buku}")
+    suspend fun deleteBuku(@Query("id_buku") idBuku: Int): Response<Void>
 }
