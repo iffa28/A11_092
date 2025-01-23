@@ -20,14 +20,14 @@ interface AnggotaApiService {
     suspend fun getAllAnggota(): List<Anggota>
 
     @GET("get1Anggota.php")
-    suspend fun  getAnggotabyId(@Query("idAnggota") idAnggota: String): Anggota
+    suspend fun  getAnggotabyId(@Query("id_anggota") idAnggota: String): Anggota
 
     @POST("insertAnggota.php")
     suspend fun insertAnggota(@Body anggota: Anggota)
 
     @PUT("updateAnggota.php/{id_anggota}")
-    suspend fun updateAnggota(@Query("idAnggota") idAnggota: String, @Body anggota: Anggota)
+    suspend fun updateAnggota(@Query("id_anggota") idAnggota: String, @Body anggota: Anggota)
 
-    @DELETE("deleteAnggota.php/{id_anggita}")
-    suspend fun deleteAnggota(@Query("idAnggota") idAnggota: String): Response<Void>
+    @DELETE("deleteAnggota.php/{id_anggota}")
+    suspend fun deleteAnggota(@Query("id_anggota") idAnggota: String): Response<Void>
 }
