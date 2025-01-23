@@ -28,3 +28,25 @@ object UpdateBookDestination : AlamatNavigasi {
     val routeWithArgs = "$route/{$idBook}"
 }
 
+
+//Anggota
+object AnggotaDestination : AlamatNavigasi {
+    override val route = "anggota"
+}
+
+object InsertAnggotaDestination : AlamatNavigasi {
+    override val route = "insert_anggota"
+}
+
+object DetailAnggotaDestination : AlamatNavigasi {
+    override val route = "detail_anggota"
+    const val idMem = "idAnggota"
+    val routeWithArgs = "$route/{$idMem}"
+}
+object UpdateAnggotaDestination : AlamatNavigasi {
+    override val route = "update_anggota"
+    const val idMem = "idAnggota"
+    val routeWithArgs = "$route/{$idMem}"
+}
+
+
