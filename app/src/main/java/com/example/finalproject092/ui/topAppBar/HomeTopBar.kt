@@ -34,7 +34,7 @@ fun HomeTopBar(
         Column(modifier= Modifier
             .padding(bottom = 10.dp)
             .fillMaxWidth()
-            .background(color = colorResource(id = R.color.HomeT),
+            .background(color = colorResource(id = R.color.main),
                 shape = RoundedCornerShape(bottomEnd = 110.dp)
             )
         )
