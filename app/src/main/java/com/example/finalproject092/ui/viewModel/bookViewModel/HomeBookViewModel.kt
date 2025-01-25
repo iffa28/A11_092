@@ -41,7 +41,7 @@ class HomeBookViewModel(
         }
     }
 
-    fun deleteBook(idBuku: Int){
+    fun deleteBook(idBuku: String){
         viewModelScope.launch {
             try {
                 bukuRepository.deleteBuku(idBuku)
