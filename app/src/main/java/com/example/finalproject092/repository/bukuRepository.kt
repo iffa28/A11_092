@@ -6,10 +6,10 @@ import java.io.IOException
 
 interface BukuRepository {
     suspend fun getAllBuku(): List<Buku>
-    suspend fun getBukubyId(idBuku: Int): Buku
+    suspend fun getBukubyId(idBuku: String): Buku
     suspend fun insertBuku(buku: Buku)
-    suspend fun updateBuku(idBuku: Int, buku: Buku)
-    suspend fun deleteBuku(idBuku: Int)
+    suspend fun updateBuku(idBuku: String, buku: Buku)
+    suspend fun deleteBuku(idBuku: String)
 }
 
 class BukuNetworkRepository(
@@ -17,7 +17,7 @@ class BukuNetworkRepository(
 ) : BukuRepository {
     override suspend fun getAllBuku(): List<Buku> = bukuApiService.getAllBuku()
 
-    override suspend fun getBukubyId(idBuku: Int): Buku {
+    override suspend fun getBukubyId(idBuku: String): Buku {
         return bukuApiService.getBukubyId(idBuku)
     }
 
@@ -25,11 +25,11 @@ class BukuNetworkRepository(
         bukuApiService.insertBuku(buku)
     }
 
-    override suspend fun updateBuku(idBuku: Int, buku: Buku) {
+    override suspend fun updateBuku(idBuku: String, buku: Buku) {
         bukuApiService.updateBuku(idBuku, buku)
     }
 
-    override suspend fun deleteBuku(idBuku: Int) {
+    override suspend fun deleteBuku(idBuku: String) {
         try {
             val response = bukuApiService.deleteBuku(idBuku)
             if (!response.isSuccessful) {
