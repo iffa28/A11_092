@@ -52,6 +52,7 @@ fun EntryBookScreen(
 ){
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -128,7 +129,9 @@ fun FormInput(
     enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val statusOptions = listOf("Tersedia", "Dipinjam") // Enum values
+    var expandedKategori by remember { mutableStateOf(false) }
+    val statusOptions = listOf("Tersedia", "Dipinjam")
+    val kategoriOptions = listOf("Fiksi", "Non-Fiksi", "Sains", "Biografi", "Antologi", "Ensiklopedia")
 
     Column(
         modifier = modifier
@@ -152,15 +155,39 @@ fun FormInput(
             enabled = enabled,
             singleLine = true
         )
-
-        OutlinedTextField(
-            value = insertBookUiEvent.kategori,
-            onValueChange = { onValueChange(insertBookUiEvent.copy(kategori = it)) },
-            label = { Text(text = "Kategori") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
+        // Input untuk Status (Dropdown)
+        ExposedDropdownMenuBox(
+            expanded = expandedKategori,
+            onExpandedChange = { expandedKategori = it }
+        ) {
+            OutlinedTextField(
+                value = insertBookUiEvent.kategori,
+                onValueChange = {},
+                label = { Text(text = "Kategori") },
+                readOnly = true,
+                enabled = enabled,
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                trailingIcon = {
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+            )
+            ExposedDropdownMenu(
+                expanded = expandedKategori,
+                onDismissRequest = { expandedKategori = false }
+            ) {
+                kategoriOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = {
+                            onValueChange(insertBookUiEvent.copy(kategori = option))
+                            expandedKategori = false
+                        }
+                    )
+                }
+            }
+        }
 
         // Input untuk Status (Dropdown)
         ExposedDropdownMenuBox(
