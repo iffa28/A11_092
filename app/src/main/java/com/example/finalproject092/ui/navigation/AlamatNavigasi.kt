@@ -49,4 +49,45 @@ object UpdateAnggotaDestination : AlamatNavigasi {
     val routeWithArgs = "$route/{$idMem}"
 }
 
+//Peminjaman
+object PeminjamanDestination : AlamatNavigasi {
+    override val route = "peminjaman"
+}
+
+object InsertPeminjamanDestination : AlamatNavigasi {
+    override val route = "insert_peminjaman"
+}
+
+object DetailPeminjamanDestination : AlamatNavigasi {
+    override val route = "detail_peminjaman"
+    const val idPj = "idPeminjaman"
+    val routeWithArgs = "$route/{$idPj}"
+}
+object UpdatePeminjamanDestination : AlamatNavigasi {
+    override val route = "update_peminjaman"
+    const val idPj = "idPeminjaman"
+    val routeWithArgs = "$route/{$idPj}"
+}
+
+
+//Pengembalian
+object PengembalianDestination : AlamatNavigasi {
+    override val route = "returned"
+}
+
+object InsertPengembalianDestination : AlamatNavigasi {
+    override val route = "insert_returned"
+}
+
+object DetailPengembalianDestination : AlamatNavigasi {
+    override val route = "detail_returned"
+    const val idPg = "idPengembalian"
+    val routeWithArgs = "$route/{$idPg}"
+}
+object UpdatePengembalianDestination : AlamatNavigasi {
+    override val route = "update_returned"
+    const val idPg = "idPengembalian"
+    val routeWithArgs = "$route/{$idPg}"
+}
+
 
