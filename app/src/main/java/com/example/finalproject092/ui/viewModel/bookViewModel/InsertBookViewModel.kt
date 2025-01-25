@@ -32,7 +32,7 @@ class InsertBookViewModel(
 }
 
 fun InsertBookUiEvent.toBk(): Buku = Buku(
-    idBuku = 0,
+    idBuku = "",
     judul = judul,
     penulis = penulis,
     kategori = kategori,
@@ -44,7 +44,7 @@ fun Buku.toUiStateBook(): InsertBookUiState = InsertBookUiState(
 )
 
 fun Buku.toInsertBookUiEvent(): InsertBookUiEvent = InsertBookUiEvent(
-    idBuku = idBuku,
+    idBuku = "",
     judul = judul,
     penulis = penulis,
     kategori = kategori,
@@ -56,7 +56,7 @@ data class InsertBookUiState(
 )
 
 data class InsertBookUiEvent(
-    val idBuku: Int = 0,
+    val idBuku: String = "",
     val judul: String = "",
     val penulis: String = "",
     val kategori: String = "",
