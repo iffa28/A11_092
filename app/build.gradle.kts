@@ -77,4 +77,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0") // atau versi terbaru
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0") // untuk mendukung LocalDate
+
+
 }
