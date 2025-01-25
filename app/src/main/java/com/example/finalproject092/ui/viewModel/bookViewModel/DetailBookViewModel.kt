@@ -10,6 +10,8 @@ import com.example.finalproject092.model.Buku
 import com.example.finalproject092.repository.BukuRepository
 import com.example.finalproject092.ui.navigation.DetailBookDestination
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 sealed class DetailBookUiState {
     data class Success(val buku: Buku) : DetailBookUiState()
@@ -24,7 +26,7 @@ class DetailBookViewModel(
 ) : ViewModel() {
 
     // Mendapatkan NIM dari `SavedStateHandle`. Jika tidak ada, akan memunculkan exception.
-    private val idBuku: Int = checkNotNull(savedStateHandle[DetailBookDestination.idBook])
+    private val idBuku: String = checkNotNull(savedStateHandle[DetailBookDestination.idBook])
     var detailBookUiState: DetailBookUiState by mutableStateOf(DetailBookUiState.Loading)
         private set
 
@@ -43,6 +45,18 @@ class DetailBookViewModel(
             }
         }
 
+    }
+
+    fun deleteBook(idBuku: String){
+        viewModelScope.launch {
+            try {
+                bukuRepo.deleteBuku(idBuku)
+            } catch (e: IOException) {
+                DetailBookUiState.Error
+            } catch (e: HttpException) {
+                DetailBookUiState.Error
+            }
+        }
     }
 
 }
