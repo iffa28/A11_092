@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -37,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,12 +55,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject092.R
 import com.example.finalproject092.model.Anggota
+import com.example.finalproject092.model.Buku
 import com.example.finalproject092.ui.topAppBar.CustomTopBar
+import com.example.finalproject092.ui.topAppBar.HomeEntitasTopBar
+import com.example.finalproject092.ui.view.bookView.BookTable
 import com.example.finalproject092.ui.viewModel.anggotaViewModel.HomeAnggotaViewModel
 import com.example.finalproject092.ui.viewModel.anggotaViewModel.MembersUiState
 import com.example.finalproject092.ui.viewModel.PenyediaViewModel
@@ -67,14 +76,20 @@ fun HomeAnggotaView(
     navigateToItemEntry: () -> Unit,
     modifier: Modifier = Modifier,
     onDetailClick: (String) -> Unit = {},
-    onEditMemberClick: (String) -> Unit,
     viewModel: HomeAnggotaViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ){
+    val refreshInterval = 10_000L // 10 seconds
+
+    LaunchedEffect(Unit) {
+        viewModel.getDataMembers()
+        kotlinx.coroutines.delay(refreshInterval)
+    }
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CustomTopBar(
+            HomeEntitasTopBar(
                 navigateUp = navigateBack,
                 title = "Home Anggota",
                 canNavigateBack = true,
@@ -100,11 +115,7 @@ fun HomeAnggotaView(
             modifier = Modifier
                 .padding(innerPadding),
             onDetailClick = onDetailClick,
-            onDeleteClick = {
-                viewModel.deleteAnggota(it.idAnggota)
-                viewModel.getDataMembers()
-            },
-            onEditClick = onEditMemberClick
+            navigateToItemEntry = navigateToItemEntry
         )
     }
 }
@@ -116,9 +127,8 @@ fun HomeAnggotaStatus(
     membersUiState: MembersUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
+    navigateToItemEntry: () -> Unit,
     onDetailClick: (String) -> Unit,
-    onEditClick: (String) -> Unit,
-    onDeleteClick: (Anggota) -> Unit = {}
 ){
     Box(
         modifier = modifier
@@ -137,7 +147,14 @@ fun HomeAnggotaStatus(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Tidak ada data Anggota")
+                        Column(modifier=Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "Tidak ada data anggota")
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Button(onClick = navigateToItemEntry){
+                                Text(text = "Tambah Anggota")
+                            }
+
+                        }
                     }
                 } else {
                     AnggotaLayout(
@@ -147,12 +164,6 @@ fun HomeAnggotaStatus(
                             .padding(top = 5.dp),
                         onDetailClick = {
                             onDetailClick(it.idAnggota)
-                        },
-                        onDeleteClick = {
-                            onDeleteClick(it)
-                        },
-                        onEditMemClick = {
-                            onEditClick(it)
                         }
                     )
                 }
@@ -203,42 +214,15 @@ fun OnError(
 }
 
 @Composable
-fun SearchAnggotaBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = { Text("Cari Anggota...") },
-        modifier = modifier.border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(4.dp)),
-        singleLine = true,
-    )
-    Spacer(modifier = Modifier.padding(10.dp))
-
-    Text(text = "Daftar Anggota",
-        style = TextStyle(
-            color = Color.DarkGray,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp)
-    )
-}
-
-@Composable
 fun AnggotaLayout(
     anggota: List<Anggota>,
     modifier: Modifier = Modifier,
     onDetailClick: (Anggota) -> Unit,
-    onDeleteClick: (Anggota) -> Unit = {},
-    onEditMemClick: (String) -> Unit = {},
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    var inputPencarian by remember { mutableStateOf("") }
 
-    val filteredAnggota = if (searchQuery.isNotEmpty()) {
-        anggota.filter { it.nama.contains(searchQuery, ignoreCase = true) }
-    } else {
-        anggota
+    val filteredAnggota = anggota.filter {
+        it.idAnggota.contains(inputPencarian, ignoreCase = true)
     }
 
     LazyColumn(
@@ -252,121 +236,169 @@ fun AnggotaLayout(
     ) {
         item {
             SearchAnggotaBar(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
+                anggota = inputPencarian,
+                onQueryChange = { inputPencarian = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding( top = 10.dp)
             )
         }
-        items(anggota){ mem ->
-            AnggotaCard(
-                anggota = mem,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {onDetailClick(mem)},
-                onDeleteClick = {
-                    onDeleteClick(mem)
-                },
-                onEditClick = {
-                    onEditMemClick(it.idAnggota)
-                }
-            )
-
+        item(filteredAnggota) {
+            MemberTable(anggota = filteredAnggota,
+                onDetailClick = onDetailClick)
         }
 
     }
 }
 
 @Composable
-fun AnggotaCard(
-    anggota: Anggota,
-    modifier: Modifier = Modifier,
-    onDeleteClick: (Anggota) -> Unit = {},
-    onEditClick: (Anggota) -> Unit = {}
+fun SearchAnggotaBar(
+    anggota: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var deleteConfirmationRequired by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+    Spacer(modifier = Modifier.padding(6.dp))
+    OutlinedTextField(
+        value = anggota,
+        onValueChange = onQueryChange,
+        placeholder = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Cari Anggota...",
+                    color = Color.Gray
+                )
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search Icon",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
+        shape = RoundedCornerShape(13.dp),
+        modifier = Modifier
+            .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(13.dp)),
+        singleLine = true
+    )
+    Spacer(modifier = Modifier.padding(10.dp))
+
+    Text(text = "Daftar Anggota",
+        style = TextStyle(
+            color = Color.DarkGray,
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp)
+    )
+}
+
+@Composable
+fun MemberTable(
+    anggota: List<Anggota>,
+    onDetailClick: (Anggota) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(8.dp))
+    ) {
+        // Header Tabel
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray, shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                .padding(vertical = 6.dp)
+        ) {
+            Text(
+                text = "ID Anggota",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(1.5f)
+                    .padding(horizontal = 4.dp),
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontSize = 16.sp)
+            )
+
+            Text(
+                text = "Nama",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(2f)
+                    .padding(horizontal = 4.dp),
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontSize = 16.sp)
+            )
+            Text(
+                text = "Email",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(2f)
+                    .padding(horizontal = 4.dp),
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontSize = 16.sp)
+            )
+            Text(
+                text = "No.Telp",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(1.5f)
+                    .padding(horizontal = 4.dp),
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontSize = 16.sp)
+            )
+
+        }
+        anggota.forEach { ag ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = anggota.nama,
-                    style = MaterialTheme.typography.titleLarge
+                    text = ag.idAnggota,
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .padding(horizontal = 4.dp),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(fontSize = 14.sp)
+
                 )
-                Spacer(Modifier.weight(1f))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    IconButton(onClick = { onEditClick(anggota) }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit"
-                        )
-                    }
-
-                    IconButton(onClick = {
-                        deleteConfirmationRequired = true
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete"
-                        )
-                    }
-                }
-            }
-            Text(
-                text = anggota.idAnggota,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = anggota.email,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = anggota.nomorTelepon,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-    }
-
-    if (deleteConfirmationRequired) {
-        DeleteConfirmationDialog(
-            onDeleteConfirm = {
-                deleteConfirmationRequired = false
-                onDeleteClick(anggota)
-            },
-            onDeleteCancel = { deleteConfirmationRequired = false },
-            modifier = Modifier.padding(8.dp)
-        )
-    }
-}
-
-@Composable
-private fun DeleteConfirmationDialog(
-    onDeleteConfirm: () -> Unit, onDeleteCancel: () -> Unit, modifier: Modifier = Modifier
-) {
-    AlertDialog(onDismissRequest = { /* Do Nothing */  },
-        title = { Text("Delete Data") },
-        text = { Text("Apakah anda yakin ingin menghapus data?") },
-        modifier = modifier,
-        dismissButton = {
-            TextButton(onClick = onDeleteCancel) {
-                Text(text = "Cancel")
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDeleteConfirm) {
-                Text(text = "Yes")
+                Text(
+                    text = ag.nama,
+                    modifier = Modifier
+                        .weight(2f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple(bounded = true)
+                        ) {
+                            onDetailClick(ag)
+                        }
+                        .padding(horizontal = 4.dp),
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp
+                    )
+                )
+                Text(
+                    text = ag.email,
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(horizontal = 4.dp),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(fontSize = 15.sp)
+                )
+                Text(
+                    text = ag.nomorTelepon,
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .padding(horizontal = 4.dp),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(fontSize = 15.sp)
+                )
             }
         }
-    )
+    }
 }
