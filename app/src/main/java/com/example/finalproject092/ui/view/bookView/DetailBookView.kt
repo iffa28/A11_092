@@ -1,10 +1,13 @@
 package com.example.finalproject092.ui.view.bookView
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,9 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject092.R
 import com.example.finalproject092.model.Buku
 import com.example.finalproject092.ui.topAppBar.CustomTopBar
+import com.example.finalproject092.ui.topAppBar.HomeEntitasTopBar
 import com.example.finalproject092.ui.viewModel.PenyediaViewModel
 import com.example.finalproject092.ui.viewModel.bookViewModel.DetailBookUiState
 import com.example.finalproject092.ui.viewModel.bookViewModel.DetailBookViewModel
@@ -54,8 +60,8 @@ fun DetailBookScreen(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CustomTopBar(
-                title = "Detail",
+            HomeEntitasTopBar(
+                title = "Detail Buku",
                 canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
                 navigateUp = navigateBack,
@@ -88,18 +94,33 @@ fun DetailStatus(
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
 ){
-    when(bookUiState){
-        is DetailBookUiState.Success -> {
-            DetailBookLayout(
-                buku = bookUiState.buku,
-                onDeleteClick = {onDeleteClick(it)},
-                onEditBkClick = {onEditClick(it)},
-                modifier = modifier
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        colorResource(id = R.color.main),
+                        colorResource(id = R.color.contain)
+                    )
+                ),
             )
+    ) {
+        when(bookUiState){
+            is DetailBookUiState.Success -> {
+                DetailBookLayout(
+                    buku = bookUiState.buku,
+                    onDeleteClick = {onDeleteClick(it)},
+                    onEditBkClick = {onEditClick(it)},
+                    modifier = modifier
+                )
+            }
+            is DetailBookUiState.Loading -> OnLoading(modifier = modifier)
+            is DetailBookUiState.Error -> OnError(retryAction, modifier = modifier)
         }
-        is DetailBookUiState.Loading -> OnLoading(modifier = modifier)
-        is DetailBookUiState.Error -> OnError(retryAction, modifier = modifier)
+
     }
+
 }
 
 @Composable
@@ -109,60 +130,52 @@ fun DetailBookLayout(
     onEditBkClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.padding(top = 100.dp)){
-        ItemDetailBook(
-            buku = buku,
-            onDeleteClick = {onDeleteClick(it)},
-            onEditClick = {onEditBkClick(it.idBuku)},
+    var deleteConfirmationRequired by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .padding(19.dp)
+    ) {
+
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.padding(10.dp))
-    }
-}
-
-@Composable
-fun ItemDetailBook(
-    modifier: Modifier = Modifier,
-    buku : Buku,
-    onDeleteClick: (Buku) -> Unit,
-    onEditClick: (Buku) -> Unit,
-)
-{
-    var deleteConfirmationRequired by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally){
-        Row {
-            Text(text = "Detail Buku", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.HomeTil))
-            IconButton(onClick = {onEditClick(buku)}) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Delete",
-                    Modifier.size(28.dp)
+                .background(
+                    color = colorResource(id = R.color.white),
+                    shape = RoundedCornerShape(12.dp)
                 )
-            }
-
-        }
-
-        Column(modifier = Modifier.padding(15.dp).background(color = colorResource(id = R.color.cIns), shape = RoundedCornerShape(5.dp))
+                .padding(16.dp)
         ) {
-
             ComponentDetailBook(judul = "ID Buku", isinya = buku.idBuku)
             ComponentDetailBook(judul = "Judul Buku", isinya = buku.judul)
             ComponentDetailBook(judul = "Penulis", isinya = buku.penulis)
             ComponentDetailBook(judul = "Kategori", isinya = buku.kategori)
             ComponentDetailBook(judul = "Status", isinya = buku.status)
+        }
 
-            Spacer(modifier = Modifier.padding(10.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                IconButton(onClick = {
-                    deleteConfirmationRequired = true
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        Modifier.size(28.dp)
-                    )
-                }
+        Spacer(modifier = Modifier.padding(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = { onEditBkClick(buku.idBuku) }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.edit),
+                    contentDescription = "Edit",
+                    tint = colorResource(id = R.color.HomeTil),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            IconButton(onClick = {
+                deleteConfirmationRequired = true
+            }){
+                Icon(
+                    painter = painterResource(id = R.drawable.delete),
+                    contentDescription = "Delete",
+                    tint = Color.Red,
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     }
@@ -176,7 +189,6 @@ fun ItemDetailBook(
             modifier = Modifier.padding(8.dp)
         )
     }
-
 }
 
 @Composable
@@ -185,40 +197,37 @@ fun ComponentDetailBook(
     judul: String,
     isinya: String
 ) {
-
     Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 15.dp)
     ) {
-        Column {
-            Text(
-                text = "$judul : ",
-                color = Color(0XFF3E5879),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End){
-            Text(
-                text = isinya,
-                fontSize = 18.sp,
-                color = Color(0XFF213555),
-                fontWeight = FontWeight.Bold,
-            )
+        Text(
+            text = "$judul:",
+            fontSize = 19.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = colorResource(id = R.color.HomeTil)
+        )
 
-        }
+        Spacer(modifier = Modifier.weight(1f))
 
+        Text(
+            text = isinya,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Normal,
+            color = colorResource(id = R.color.HomeTil)
+        )
     }
-
 }
 
 @Composable
 private fun DeleteConfirmationDialog(
     onDeleteConfirm: () -> Unit, onDeleteCancel: () -> Unit, modifier: Modifier = Modifier
 ) {
-    AlertDialog(onDismissRequest = { /* Do Nothing */  },
-        title = { Text("Delete Data") },
-        text = { Text("Apakah anda yakin ingin menghapus data?") },
+    AlertDialog(
+        onDismissRequest = { /* Do Nothing */ },
+        title = { Text("Delete Data", fontWeight = FontWeight.Bold) },
+        text = { Text("Apakah anda yakin ingin menghapus data ini?") },
         modifier = modifier,
         dismissButton = {
             TextButton(onClick = onDeleteCancel) {
