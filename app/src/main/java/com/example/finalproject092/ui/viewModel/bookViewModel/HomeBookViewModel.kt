@@ -41,16 +41,4 @@ class HomeBookViewModel(
         }
     }
 
-    fun deleteBook(idBuku: String){
-        viewModelScope.launch {
-            try {
-                bukuRepository.deleteBuku(idBuku)
-            } catch (e: IOException) {
-                DetailBookUiState.Error
-            } catch (e: HttpException) {
-                DetailBookUiState.Error
-            }
-        }
-    }
-
 }
