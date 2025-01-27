@@ -10,6 +10,8 @@ import com.example.finalproject092.model.Anggota
 import com.example.finalproject092.repository.AnggotaRepository
 import com.example.finalproject092.ui.navigation.DetailAnggotaDestination
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 sealed class DetailMemUiState {
     data class Success(val anggota: Anggota) : DetailMemUiState()
@@ -43,6 +45,18 @@ class DetailAnggotaViewModel(
             }
         }
 
+    }
+
+    fun deleteAnggota(idAnggota: String){
+        viewModelScope.launch {
+            try {
+                anggotaRepo.deleteAnggota(idAnggota)
+            } catch (e: IOException) {
+                MembersUiState.Error
+            } catch (e: HttpException) {
+                MembersUiState.Error
+            }
+        }
     }
 
 }
