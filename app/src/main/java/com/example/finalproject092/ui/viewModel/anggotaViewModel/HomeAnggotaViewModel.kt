@@ -41,16 +41,4 @@ class HomeAnggotaViewModel(
         }
     }
 
-    fun deleteAnggota(idAnggota: String){
-        viewModelScope.launch {
-            try {
-                anggotaRepository.deleteAnggota(idAnggota)
-            } catch (e: IOException) {
-                MembersUiState.Error
-            } catch (e: HttpException) {
-                MembersUiState.Error
-            }
-        }
-    }
-
 }
