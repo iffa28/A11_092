@@ -14,14 +14,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -30,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject092.R
 import com.example.finalproject092.model.Buku
-import com.example.finalproject092.ui.topAppBar.CustomTopBar
+import com.example.finalproject092.ui.topAppBar.HomeEntitasTopBar
 import com.example.finalproject092.ui.viewModel.bookViewModel.BookUiState
 import com.example.finalproject092.ui.viewModel.bookViewModel.HomeBookViewModel
 import com.example.finalproject092.ui.viewModel.PenyediaViewModel
@@ -80,7 +80,7 @@ fun HomeBookView(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CustomTopBar(
+            HomeEntitasTopBar(
                 navigateUp = navigateBack,
                 title = "Home Buku",
                 canNavigateBack = true,
@@ -105,7 +105,8 @@ fun HomeBookView(
             retryAction = {viewModel.getDataBook()},
             modifier = Modifier
                 .padding(innerPadding),
-            onDetailClick = onDetailBukuClick
+            onDetailClick = onDetailBukuClick,
+            navigateToItemEntry = navigateToItemEntry
         )
     }
 }
@@ -116,6 +117,7 @@ fun HomeBookView(
 fun HomeBookStatus(
     bookUiState: BookUiState,
     retryAction: () -> Unit,
+    navigateToItemEntry: () -> Unit,
     onDetailClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ){
@@ -136,7 +138,14 @@ fun HomeBookStatus(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Tidak ada data Buku")
+                        Column(modifier=Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "Tidak ada data Buku")
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Button(onClick = navigateToItemEntry){
+                                Text(text = "Tambah Buku")
+                            }
+
+                        }
                     }
                 } else {
                     BookLayout(
@@ -240,12 +249,30 @@ fun SearchBar(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    Spacer(modifier = Modifier.padding(6.dp))
     OutlinedTextField(
         value = buku,
         onValueChange = onQueryChange,
-        placeholder = { Text("Cari Judul Buku...") },
-        modifier = modifier.border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(4.dp)),
-        singleLine = true,
+        placeholder = {
+            Row(
+                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Cari Judul Buku...",
+                    color = Color.Gray
+                )
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search Icon",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
+        shape = RoundedCornerShape(13.dp),
+        modifier = Modifier
+            .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(13.dp)),
+        singleLine = true
     )
     Spacer(modifier = Modifier.padding(10.dp))
 
@@ -271,7 +298,7 @@ fun BookTable(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray, shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                .background(colorResource(id = R.color.warnatabel), shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 .padding(vertical = 6.dp)
         ) {
             Text(
@@ -312,7 +339,7 @@ fun BookTable(
                 style = TextStyle(fontSize = 16.sp)
             )
             Text(
-                text = "Status",
+                text = "Status Ketersediaan",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .weight(1.5f)
@@ -325,7 +352,7 @@ fun BookTable(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -382,26 +409,4 @@ fun BookTable(
             }
         }
     }
-}
-
-
-@Composable
-private fun DeleteConfirmationDialog(
-    onDeleteConfirm: () -> Unit, onDeleteCancel: () -> Unit, modifier: Modifier = Modifier
-) {
-    AlertDialog(onDismissRequest = { /* Do Nothing */  },
-        title = { Text("Delete Data") },
-        text = { Text("Apakah anda yakin ingin menghapus data?") },
-        modifier = modifier,
-        dismissButton = {
-            TextButton(onClick = onDeleteCancel) {
-                Text(text = "Cancel")
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDeleteConfirm) {
-                Text(text = "Yes")
-            }
-        }
-    )
 }
