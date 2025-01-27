@@ -11,8 +11,14 @@ data class Peminjaman (
 
     @SerialName("id_buku")
     val idBuku: String,
+
+    val judul: String,
+    val status : String,
+
     @SerialName("id_anggota")
     val idAnggota: String,
+
+    val nama: String,
 
     @SerialName("tanggal_peminjaman")
     @Serializable(with = LocalDateSerializer::class)
@@ -20,5 +26,7 @@ data class Peminjaman (
 
     @SerialName("tanggal_pengembalian")
     @Serializable(with = LocalDateSerializer::class)
-    val tanggalPengembalian: LocalDate,
+    val tanggalPengembalian: LocalDate
+
+
 )
