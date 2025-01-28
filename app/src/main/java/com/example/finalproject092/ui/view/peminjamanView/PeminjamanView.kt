@@ -85,7 +85,7 @@ fun HomeBorrowView(
             )
         }
     ) { innerPadding ->
-        HomeBookStatus(
+        HomePeminjamanStatus(
             pinjamUiState = viewModel.pinjamUiState,
             retryAction = {viewModel.getBorrowBook()},
             modifier = Modifier
@@ -99,7 +99,7 @@ fun HomeBorrowView(
 
 
 @Composable
-fun HomeBookStatus(
+fun HomePeminjamanStatus(
     pinjamUiState: BorrowUiState,
     retryAction: () -> Unit,
     onDetailClick: (Int) -> Unit,
@@ -134,7 +134,7 @@ fun HomeBookStatus(
 
                     }
                 } else {
-                    BookLayout(
+                    PeminjamanLayout(
                         peminjaman = pinjamUiState.peminjaman,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -195,7 +195,7 @@ fun OnError(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookLayout(
+fun PeminjamanLayout(
     peminjaman: List<Peminjaman>,
     onDetailClick: (Peminjaman) -> Unit,
     onAddClick: () -> Unit,
