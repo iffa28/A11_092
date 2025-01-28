@@ -13,6 +13,7 @@ import com.example.finalproject092.repository.AnggotaRepository
 import com.example.finalproject092.repository.BukuRepository
 import com.example.finalproject092.repository.PeminjamanRepository
 import com.example.finalproject092.ui.navigation.UpdatePeminjamanDestination
+import com.example.finalproject092.ui.viewModel.pengembalianViewModel.toPg
 import kotlinx.coroutines.launch
 
 class UpdatePeminjamanViewModel(
@@ -89,12 +90,9 @@ class UpdatePeminjamanViewModel(
     suspend fun  updatePeminjamanData(){
         viewModelScope.launch {
             try {
-                val peminjaman = peminjamanRepo.getPinjambyId(idPeminjaman)
-
-                Log.d("UpdatePengembalianViewModel", "Data pengembalian untuk idReturn $idPeminjaman ditemukan: $peminjaman")
-                updatePjUiState = peminjaman.toUiStatePj()
-            } catch (e: Exception) {
-                Log.e("UpdatePengembalianViewModel", "Gagal mengambil data pengembalian: ${e.message}")
+                peminjamanRepo.updatePinjam(idPeminjaman, updatePjUiState.insertPjUiEvent.toPj())
+            } catch (e: Exception){
+                e.printStackTrace()
             }
         }
     }

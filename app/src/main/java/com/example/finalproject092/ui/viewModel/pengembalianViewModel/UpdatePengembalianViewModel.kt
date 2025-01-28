@@ -11,6 +11,7 @@ import com.example.finalproject092.model.Peminjaman
 import com.example.finalproject092.repository.PeminjamanRepository
 import com.example.finalproject092.repository.PengembalianRepository
 import com.example.finalproject092.ui.navigation.UpdatePengembalianDestination
+import com.example.finalproject092.ui.viewModel.anggotaViewModel.toMem
 import kotlinx.coroutines.launch
 
 class UpdatePengembalianViewModel(
@@ -66,16 +67,12 @@ class UpdatePengembalianViewModel(
         updatePgUiState = InsertPgUiState(insertPgUiEvent = insertPgUiEvent)
     }
 
-    // Fungsi untuk memperbarui data pengembalian
-    suspend fun updatePengembalian() {
+    suspend fun  updatePengembalianData(){
         viewModelScope.launch {
             try {
-                val pengembalian = pengembalianRepo.getReturnedbyId(idReturn)
-
-                Log.d("UpdatePengembalianViewModel", "Data pengembalian untuk idReturn $idReturn: $pengembalian")
-                updatePgUiState = pengembalian.toUiStatePg()
-            } catch (e: Exception) {
-                Log.e("UpdatePengembalianViewModel", "Gagal mengambil data pengembalian: ${e.message}")
+                pengembalianRepo.updateReturned(idReturn, updatePgUiState.insertPgUiEvent.toPg())
+            } catch (e: Exception){
+                e.printStackTrace()
             }
         }
     }
