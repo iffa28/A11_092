@@ -12,28 +12,49 @@ import kotlinx.coroutines.launch
 
 class UpdateBookViewModel(
     savedStateHandle: SavedStateHandle,
-    private val bukuRepo : BukuRepository
+    private val bukuRepo: BukuRepository
 ) : ViewModel() {
+
     var updateBookUiState by mutableStateOf(InsertBookUiState())
         private set
-    val idBuku: Int = checkNotNull(savedStateHandle[UpdateBookDestination.idBook])
+
+    val idBuku: String = checkNotNull(savedStateHandle[UpdateBookDestination.idBook])
 
     init {
+        // Fetch book data by idBuku and update UI state
         viewModelScope.launch {
-            updateBookUiState = bukuRepo.getBukubyId(idBuku).toUiStateBook()
+            try {
+                // Assuming getBukubyId returns a Buku object
+                val buku = bukuRepo.getBukubyId(idBuku)
+                updateBookUiState = InsertBookUiState(
+                    insertBookUiEvent = InsertBookUiEvent(
+                        idBuku = buku.idBuku,
+                        judul = buku.judul,
+                        penulis = buku.penulis,
+                        kategori = buku.kategori,
+                        status = buku.status
+                    )
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Handle error (e.g., update state with error message)
+            }
         }
     }
 
-    fun updateInsertBookState(insertBookUiEvent: InsertBookUiEvent){
-        updateBookUiState = InsertBookUiState(insertBookUiEvent = insertBookUiEvent)
+    // Update the state when the form values change
+    fun updateInsertBookState(insertBookUiEvent: InsertBookUiEvent) {
+        updateBookUiState = updateBookUiState.copy(insertBookUiEvent = insertBookUiEvent)
     }
 
-    suspend fun  updateBookData(){
+    // Update the book data in the repository
+    fun updateBookData() {
         viewModelScope.launch {
             try {
                 bukuRepo.updateBuku(idBuku, updateBookUiState.insertBookUiEvent.toBk())
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
+                // Handle error (e.g., update state with error message)
             }
         }
     }
