@@ -213,7 +213,9 @@ fun BookLayout(
     var searchBuku by remember { mutableStateOf("") }
 
     val filteredBuku = buku.filter {
-        it.judul.contains(searchBuku, ignoreCase = true)
+        it.judul.contains(searchBuku, ignoreCase = true) ||
+                it.penulis.contains(searchBuku, ignoreCase = true) ||
+                it.kategori.contains(searchBuku, ignoreCase = true)
 
     }
 
@@ -258,7 +260,7 @@ fun SearchBar(
                 modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Cari Judul Buku...",
+                    text = "Cari Buku...",
                     color = Color.Gray
                 )
                 Icon(
@@ -270,7 +272,7 @@ fun SearchBar(
             }
         },
         shape = RoundedCornerShape(13.dp),
-        modifier = Modifier
+        modifier = Modifier.fillMaxWidth()
             .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(13.dp)),
         singleLine = true
     )
