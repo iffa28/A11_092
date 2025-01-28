@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
@@ -69,10 +72,13 @@ fun EntryBookScreen(
             onSiswaValueChange = viewModel::updateInsertBukuState,
             onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.insertBook()
-                    navigateBack()
+                    viewModel.validateAndInsertBook()
+                    if (viewModel.uiState.validationErrors.isEmpty()) {
+                        navigateBack() // Only navigate if no validation errors
+                    }
                 }
             },
+
             modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
@@ -92,32 +98,36 @@ fun EntryBody(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = colorResource(id = R.color.main),
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        colorResource(id = R.color.main),
+                        colorResource(id = R.color.contain)
+                    )
+                )
             )
+            .padding(start=8.dp, end=8.dp)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp)
+                .padding(10.dp)
                 .background(
                     color = colorResource(id = R.color.contain),
                     shape = RoundedCornerShape(20.dp)
                 )
+                .padding(16.dp)
         ) {
             FormInput(
                 insertBookUiEvent = insertBookUiState.insertBookUiEvent,
                 onValueChange = onSiswaValueChange,
                 onSaveClick = onSaveClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(13.dp) // Memberikan jarak padding untuk tata letak yang lebih rapi
+                validationErrors = insertBookUiState.validationErrors,
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.weight(1f)) // Mengisi ruang kosong di bagian bawah
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,36 +136,64 @@ fun FormInput(
     modifier: Modifier = Modifier,
     onValueChange: (InsertBookUiEvent) -> Unit = {},
     onSaveClick: () -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    validationErrors: List<String> = emptyList()
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expandedStatus by remember { mutableStateOf(false) }
     var expandedKategori by remember { mutableStateOf(false) }
     val statusOptions = listOf("Tersedia", "Dipinjam")
     val kategoriOptions = listOf("Fiksi", "Non-Fiksi", "Sains", "Biografi", "Antologi", "Ensiklopedia")
 
     Column(
-        modifier = modifier
-            .padding(5.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier.padding(5.dp),
     ) {
+        // Judul Buku
         OutlinedTextField(
             value = insertBookUiEvent.judul,
             onValueChange = { onValueChange(insertBookUiEvent.copy(judul = it)) },
-            label = { Text(text = "Judul") },
+            label = { Text(text = "Judul Buku") },
+            placeholder = { Text(text = "Masukkan judul buku") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            singleLine = true
+            singleLine = true,
+            isError = validationErrors.contains("Judul buku tidak boleh kosong")
         )
+        Spacer(modifier = Modifier.padding(3.dp))
+        // Error message for Judul Buku
+        if (validationErrors.contains("Judul buku tidak boleh kosong")) {
+            Text(
+                text = "*Judul buku tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
 
+        // Penulis
         OutlinedTextField(
             value = insertBookUiEvent.penulis,
             onValueChange = { onValueChange(insertBookUiEvent.copy(penulis = it)) },
             label = { Text(text = "Penulis") },
+            placeholder = { Text(text = "Masukkan nama penulis") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            singleLine = true
+            singleLine = true,
+            isError = validationErrors.contains("Penulis tidak boleh kosong")
         )
-        // Input untuk Status (Dropdown)
+        Spacer(modifier = Modifier.padding(3.dp))
+        // Error message for Penulis
+        if (validationErrors.contains("Penulis tidak boleh kosong")) {
+            Text(
+                text = "*Penulis tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
+
+        // Kategori Dropdown
         ExposedDropdownMenuBox(
             expanded = expandedKategori,
             onExpandedChange = { expandedKategori = it }
@@ -164,6 +202,7 @@ fun FormInput(
                 value = insertBookUiEvent.kategori,
                 onValueChange = {},
                 label = { Text(text = "Kategori") },
+                placeholder = { Text(text = "Pilih kategori") },
                 readOnly = true,
                 enabled = enabled,
                 modifier = Modifier
@@ -171,7 +210,8 @@ fun FormInput(
                     .fillMaxWidth(),
                 trailingIcon = {
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                }
+                },
+                isError = validationErrors.contains("Kategori tidak boleh kosong")
             )
             ExposedDropdownMenu(
                 expanded = expandedKategori,
@@ -188,16 +228,28 @@ fun FormInput(
                 }
             }
         }
+        Spacer(modifier = Modifier.padding(3.dp))
+        // Error message for Kategori
+        if (validationErrors.contains("Kategori tidak boleh kosong")) {
+            Text(
+                text = "*Kategori tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
 
-        // Input untuk Status (Dropdown)
+        // Status Dropdown
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = it }
+            expanded = expandedStatus,
+            onExpandedChange = { expandedStatus = it }
         ) {
             OutlinedTextField(
                 value = insertBookUiEvent.status,
                 onValueChange = {},
                 label = { Text(text = "Status") },
+                placeholder = { Text(text = "Pilih status") },
                 readOnly = true,
                 enabled = enabled,
                 modifier = Modifier
@@ -205,23 +257,35 @@ fun FormInput(
                     .fillMaxWidth(),
                 trailingIcon = {
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                }
+                },
+                isError = validationErrors.contains("Status tidak boleh kosong")
             )
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = expandedStatus,
+                onDismissRequest = { expandedStatus = false }
             ) {
                 statusOptions.forEach { option ->
                     DropdownMenuItem(
                         text = { Text(option) },
                         onClick = {
                             onValueChange(insertBookUiEvent.copy(status = option))
-                            expanded = false
+                            expandedStatus = false
                         }
                     )
                 }
             }
         }
+        Spacer(modifier = Modifier.padding(3.dp))
+        // Error message for Status
+        if (validationErrors.contains("Status tidak boleh kosong")) {
+            Text(
+                text = "*Status tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
 
         if (enabled) {
             Text(
@@ -235,12 +299,21 @@ fun FormInput(
             modifier = Modifier.padding(12.dp)
         )
 
+        // Save button
         Button(
             onClick = onSaveClick,
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = R.color.HomeTil),
+                contentColor = colorResource(id = R.color.white)
+            ),
+            elevation = ButtonDefaults.elevatedButtonElevation(
+                defaultElevation = 8.dp
+            )
         ) {
-            Text(text = "Simpan")
+            Text(text = "Simpan", style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
+
