@@ -89,16 +89,7 @@ fun HomeBookView(
                     viewModel.getDataBook()
                 },
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToItemEntry,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(16.dp)
-            ){
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Book")
-            }
-        },
+        }
     ) { innerPadding ->
         HomeBookStatus(
             bookUiState = viewModel.bukuUiState,
@@ -155,7 +146,8 @@ fun HomeBookStatus(
                             .padding(top = 5.dp),
                         onDetailClick = {
                             onDetailClick(it.idBuku)
-                        }
+                        },
+                        onAddClick = navigateToItemEntry
                     )
                 }
 
@@ -208,6 +200,7 @@ fun OnError(
 fun BookLayout(
     buku: List<Buku>,
     onDetailClick: (Buku) -> Unit,
+    onAddClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var searchBuku by remember { mutableStateOf("") }
@@ -238,7 +231,8 @@ fun BookLayout(
         }
         item(filteredBuku) {
             BookTable(buku = filteredBuku,
-                onDetailClick = onDetailClick)
+                onDetailClick = onDetailClick,
+                onAddClick = onAddClick)
         }
 
     }
@@ -276,21 +270,30 @@ fun SearchBar(
             .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(13.dp)),
         singleLine = true
     )
-    Spacer(modifier = Modifier.padding(10.dp))
-
-    Text(text = "Daftar Buku",
-        style = TextStyle(
-            color = Color.DarkGray,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp)
-        )
 }
 
 @Composable
 fun BookTable(
     buku: List<Buku>,
+    onAddClick: () -> Unit = {},
     onDetailClick: (Buku) -> Unit,
 ) {
+    Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "Daftar Buku",
+            style = TextStyle(
+                color = Color.DarkGray,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(onClick = onAddClick){
+            Text(text = "Tambah Buku")
+        }
+
+    }
+    Spacer(modifier = Modifier.padding(10.dp))
     Column(
         modifier = Modifier
             .fillMaxWidth()
