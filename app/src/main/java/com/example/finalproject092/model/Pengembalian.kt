@@ -11,7 +11,11 @@ data class Pengembalian (
 
     @SerialName("id_peminjaman")
     val idPeminjaman: Int,
+    val nama: String,
+    val judul: String,
 
+    @SerialName("id_anggota")
+    val idAnggota: String,
     @SerialName("tanggal_dikembalikan")
 
     @Serializable(with = LocalDateSerializer::class)
