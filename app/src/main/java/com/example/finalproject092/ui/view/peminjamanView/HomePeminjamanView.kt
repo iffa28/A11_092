@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -33,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -233,21 +231,12 @@ fun PeminjamanLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            SearchBar(
-                peminjaman = searchPeminjaman,
-                onQueryChange = {
-                    searchPeminjaman = it
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding( top = 10.dp)
-            )
-        }
-        item {
-            Button(onClick = onAddClick){
-                Text(text = "Tambah Peminjaman")
+            Button(onClick = onAddClick,
+                modifier = Modifier.height(45.dp).fillMaxWidth()){
+                Text(text = "Tambah Peminjaman",
+                    fontSize = 18.sp)
             }
-            Spacer(modifier.padding(3.dp))
+            Spacer(modifier.padding(5.dp))
             Row(
                 modifier = Modifier
                     .padding(vertical = 8.dp)
@@ -309,22 +298,6 @@ fun PeminjamanLayout(
                 onDetailClick = onDetailClick)
         }
     }
-}
-
-@Composable
-fun SearchBar(
-    peminjaman: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = peminjaman,
-        onValueChange = onQueryChange,
-        placeholder = { Text("Cari...") },
-        modifier = modifier.border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(4.dp)),
-    )
-    Spacer(modifier = Modifier.width(8.dp))
-
 }
 
 
