@@ -20,13 +20,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -91,7 +99,8 @@ fun HomeBorrowView(
             modifier = Modifier
                 .padding(innerPadding),
             onDetailClick = onDetailPjClick,
-            navigateToItemEntry = navigateToItemEntry
+            navigateToItemEntry = navigateToItemEntry,
+            viewModel = viewModel
         )
     }
 }
@@ -103,6 +112,7 @@ fun HomePeminjamanStatus(
     pinjamUiState: BorrowUiState,
     retryAction: () -> Unit,
     onDetailClick: (Int) -> Unit,
+    viewModel: HomePeminjamanViewModel,
     navigateToItemEntry: () -> Unit,
     modifier: Modifier = Modifier,
 ){
@@ -144,7 +154,8 @@ fun HomePeminjamanStatus(
                         },
                         onAddClick = {
                             navigateToItemEntry()
-                        }
+                        },
+                        viewModel = viewModel
                     )
                 }
 
@@ -199,12 +210,17 @@ fun PeminjamanLayout(
     peminjaman: List<Peminjaman>,
     onDetailClick: (Peminjaman) -> Unit,
     onAddClick: () -> Unit,
+    viewModel: HomePeminjamanViewModel,
     modifier: Modifier = Modifier
 ) {
     var searchPeminjaman by remember { mutableStateOf("") }
+    var expandedStatus by remember { mutableStateOf(false) }
+    var selectedStatus by remember { mutableStateOf("Semua") }
+    val statusList = listOf("Semua","Dipinjam", "Dikembalikan")
 
     val filteredPeminjaman = peminjaman.filter {
-        it.idAnggota.contains(searchPeminjaman, ignoreCase = true)
+        (it.nama.contains(searchPeminjaman, ignoreCase = true)) &&
+                (selectedStatus == "Semua" || it.status == selectedStatus)
     }
 
     LazyColumn(
@@ -227,14 +243,72 @@ fun PeminjamanLayout(
                     .padding( top = 10.dp)
             )
         }
-        item(filteredPeminjaman) {
+        item {
+            Button(onClick = onAddClick){
+                Text(text = "Tambah Peminjaman")
+            }
+            Spacer(modifier.padding(3.dp))
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Daftar Peminjaman",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 21.sp,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.padding(5.dp))
+                ExposedDropdownMenuBox(
+                    expanded = expandedStatus,
+                    onExpandedChange = { expandedStatus = it },
+                    modifier = Modifier
+                        .fillMaxWidth() // Membatasi lebar dropdown
+                ) {
+                    TextField(
+                        value = selectedStatus,
+                        onValueChange = {},
+                        placeholder = { Text(text = "Pilih status") },
+                        readOnly = true,
+                        modifier = Modifier
+                            .menuAnchor()
+                            .background(Color.White)
+                            .height(48.dp)
+                            .fillMaxWidth(),
+                        textStyle = TextStyle(fontSize = 15.sp),
+                        trailingIcon = {
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                        }
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedStatus,
+                        onDismissRequest = { expandedStatus = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                    ) {
+                        statusList.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedStatus = option
+                                    expandedStatus = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
             PeminjamanTable(peminjaman = filteredPeminjaman,
                 onAddClick = onAddClick,
                 onDetailClick = onDetailClick)
         }
-
     }
-
 }
 
 @Composable
@@ -260,22 +334,7 @@ fun PeminjamanTable(
     onDetailClick: (Peminjaman) -> Unit,
     onAddClick: () -> Unit,
 ) {
-    Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "Daftar Peminjaman",
-            style = TextStyle(
-                color = Color.DarkGray,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp)
-        )
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Button(onClick = onAddClick){
-            Text(text = "Tambah Peminjaman")
-        }
-
-    }
-    Spacer(modifier = Modifier.padding(10.dp))
     Column(
         modifier = Modifier
             .fillMaxWidth()
