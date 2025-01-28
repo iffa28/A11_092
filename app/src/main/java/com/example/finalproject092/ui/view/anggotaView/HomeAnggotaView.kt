@@ -20,12 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -53,10 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject092.R
 import com.example.finalproject092.model.Anggota
-import com.example.finalproject092.model.Buku
-import com.example.finalproject092.ui.topAppBar.CustomTopBar
 import com.example.finalproject092.ui.topAppBar.HomeEntitasTopBar
-import com.example.finalproject092.ui.view.bookView.BookTable
 import com.example.finalproject092.ui.viewModel.anggotaViewModel.HomeAnggotaViewModel
 import com.example.finalproject092.ui.viewModel.anggotaViewModel.MembersUiState
 import com.example.finalproject092.ui.viewModel.PenyediaViewModel
@@ -90,15 +85,6 @@ fun HomeAnggotaView(
                     viewModel.getDataMembers()
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToItemEntry,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(16.dp)
-            ){
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Anggota")
-            }
         },
     ) { innerPadding ->
         HomeAnggotaStatus(
@@ -156,7 +142,8 @@ fun HomeAnggotaStatus(
                             .padding(top = 5.dp),
                         onDetailClick = {
                             onDetailClick(it.idAnggota)
-                        }
+                        },
+                        onAddClick = navigateToItemEntry
                     )
                 }
 
@@ -209,6 +196,7 @@ fun OnError(
 fun AnggotaLayout(
     anggota: List<Anggota>,
     modifier: Modifier = Modifier,
+    onAddClick: () -> Unit = {},
     onDetailClick: (Anggota) -> Unit,
 ) {
     var inputPencarian by remember { mutableStateOf("") }
@@ -238,7 +226,8 @@ fun AnggotaLayout(
         }
         item(filteredAnggota) {
             MemberTable(anggota = filteredAnggota,
-                onDetailClick = onDetailClick)
+                onDetailClick = onDetailClick,
+                onAddClick = onAddClick)
         }
 
     }
@@ -275,21 +264,31 @@ fun SearchAnggotaBar(
             .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(13.dp)),
         singleLine = true
     )
-    Spacer(modifier = Modifier.padding(10.dp))
-
-    Text(text = "Daftar Anggota",
-        style = TextStyle(
-            color = Color.DarkGray,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp)
-    )
 }
 
 @Composable
 fun MemberTable(
     anggota: List<Anggota>,
+    onAddClick: () -> Unit = {},
     onDetailClick: (Anggota) -> Unit,
 ) {
+
+    Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "Daftar Anggota",
+            style = TextStyle(
+                color = Color.DarkGray,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(onClick = onAddClick){
+            Text(text = "Tambah Anggota")
+        }
+
+    }
+    Spacer(modifier = Modifier.padding(10.dp))
     Column(
         modifier = Modifier
             .fillMaxWidth()
