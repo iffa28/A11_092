@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -100,6 +101,30 @@ fun EntryBody(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var expandedBuku by remember { mutableStateOf(false) }
+    var selectedJudul by rememberSaveable { mutableStateOf(insertPjUiState.insertPjUiEvent.judul ?: "") }
+
+    var expandedAnggota by remember { mutableStateOf(false) }
+    var selectedNama by remember { mutableStateOf(insertPjUiState.insertPjUiEvent.nama ?: "") }
+
+    var showPeminjamanDatePicker by remember { mutableStateOf(false) }
+    var showPengembalianDatePicker by remember { mutableStateOf(false) }
+
+    // Mengambil idPeminjaman yang sesuai dengan idAnggota
+    LaunchedEffect(insertPjUiState.insertPjUiEvent.idAnggota) {
+        val anggota = anggotaList.find { it.idAnggota == insertPjUiState.insertPjUiEvent.idAnggota }
+        if (anggota != null) {
+            selectedNama = anggota.nama
+        }
+    }
+
+    LaunchedEffect(insertPjUiState.insertPjUiEvent.idBuku) {
+        val  buku = bukuList.find { it.idBuku == insertPjUiState.insertPjUiEvent.idBuku }
+        if (buku != null) {
+            selectedJudul = buku.judul
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -124,14 +149,7 @@ fun EntryBody(
                 )
                 .padding(16.dp)
         ) {
-            var expandedBuku by remember { mutableStateOf(false) }
-            var selectedJudul by rememberSaveable { mutableStateOf("") }
 
-            var expandedAnggota by remember { mutableStateOf(false) }
-            var selectedNama by remember { mutableStateOf("") }
-
-            var showPeminjamanDatePicker by remember { mutableStateOf(false) }
-            var showPengembalianDatePicker by remember { mutableStateOf(false) }
 
             // Dropdown untuk memilih nama anggota
             ExposedDropdownMenuBox(
