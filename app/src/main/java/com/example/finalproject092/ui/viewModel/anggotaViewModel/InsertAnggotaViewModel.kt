@@ -19,17 +19,37 @@ class InsertAnggotaViewModel(
         uiState = InsertMembersUiState(insertMembersUiEvent = insertMembersUiEvent)
     }
 
-    suspend fun insertMember(){
-        viewModelScope.launch {
-            try {
-                anggotaRepo.insertAnggota(uiState.insertMembersUiEvent.toMem())
-            } catch (e: Exception){
-                e.printStackTrace()
+    suspend fun validateAndInsertAnggota() {
+        val validationResult = validateInput(uiState.insertMembersUiEvent)
+
+        if (validationResult.isValid) {
+            viewModelScope.launch {
+                try {
+                    anggotaRepo.insertAnggota(uiState.insertMembersUiEvent.toMem())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
+        } else {
+            // Update state untuk menampilkan pesan kesalahan
+            uiState = uiState.copy(validationErrors = validationResult.errors)
         }
     }
 
+    private fun validateInput(event: InsertMembersUiEvent): ValidationResult {
+        val errors = mutableListOf<String>()
+
+        if (event.nama.isEmpty()) errors.add("Nama tidak boleh kosong")
+        if (event.idAnggota.isEmpty()) errors.add("ID Anggota tidak boleh kosong")
+        if (event.email.isEmpty()) errors.add("Email tidak boleh kosong")
+        if (!event.email.contains("@")) errors.add("Email tidak valid")
+        if (event.nomorTelepon.isEmpty()) errors.add("Nomor telepon tidak boleh kosong")
+
+        return ValidationResult(errors.isEmpty(), errors)
+    }
+
 }
+data class ValidationResult(val isValid: Boolean, val errors: List<String>)
 
 fun InsertMembersUiEvent.toMem(): Anggota = Anggota(
     idAnggota = idAnggota,
@@ -50,7 +70,8 @@ fun Anggota.toInsertMembersUiEvent(): InsertMembersUiEvent = InsertMembersUiEven
 )
 
 data class InsertMembersUiState(
-    val insertMembersUiEvent: InsertMembersUiEvent = InsertMembersUiEvent()
+    val insertMembersUiEvent: InsertMembersUiEvent = InsertMembersUiEvent(),
+    val validationErrors: List<String> = emptyList()
 )
 
 data class InsertMembersUiEvent(
@@ -58,4 +79,5 @@ data class InsertMembersUiEvent(
     val nama: String = "",
     val email: String = "",
     val nomorTelepon: String = "",
+    val isValid: Boolean = true
 )

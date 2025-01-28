@@ -4,11 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject092.R
@@ -59,8 +63,10 @@ fun EntryMemberScreen(
             onSiswaValueChange = viewModel::updateInsertMembersState,
             onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.insertMember()
-                    navigateBack()
+                    viewModel.validateAndInsertAnggota()
+                    if (viewModel.uiState.validationErrors.isEmpty()) {
+                        navigateBack() // Only navigate if no validation errors
+                    }
                 }
             },
             modifier = Modifier
@@ -106,6 +112,7 @@ fun EntryBody(
                 insertMembersUiEvent = insertMembersUiState.insertMembersUiEvent,
                 onValueChange = onSiswaValueChange,
                 onSaveClick = onSaveClick,
+                validationErrors = insertMembersUiState.validationErrors,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -119,12 +126,13 @@ fun FormInput(
     modifier: Modifier = Modifier,
     onValueChange: (InsertMembersUiEvent) -> Unit = {},
     onSaveClick: () -> Unit,
+    validationErrors: List<String> = emptyList(),
     enabled: Boolean = true
 ) {
     Column(
         modifier = modifier.padding(5.dp),
-        verticalArrangement = Arrangement.spacedBy(30.dp)
     ) {
+        // Nama Field
         OutlinedTextField(
             value = insertMembersUiEvent.nama,
             onValueChange = { onValueChange(insertMembersUiEvent.copy(nama = it)) },
@@ -132,33 +140,99 @@ fun FormInput(
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            ),
+            isError = validationErrors.contains("Nama tidak boleh kosong")
         )
+        Spacer(modifier = Modifier.padding(3.dp))
+        if (validationErrors.contains("Nama tidak boleh kosong")) {
+            Text(
+                text = "*Nama tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
+
+        // ID Anggota Field
         OutlinedTextField(
             value = insertMembersUiEvent.idAnggota,
             onValueChange = { onValueChange(insertMembersUiEvent.copy(idAnggota = it)) },
             label = { Text(text = "ID Anggota") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            ),
+            isError = validationErrors.contains("ID Anggota tidak boleh kosong")
         )
+        Spacer(modifier = Modifier.padding(3.dp))
+        if (validationErrors.contains("ID Anggota tidak boleh kosong")) {
+            Text(
+                text = "*ID Anggota tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
+
+        // Email Field
         OutlinedTextField(
             value = insertMembersUiEvent.email,
             onValueChange = { onValueChange(insertMembersUiEvent.copy(email = it)) },
             label = { Text(text = "Email") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
+            isError = validationErrors.contains("Email tidak boleh kosong")
         )
+        Spacer(modifier = Modifier.padding(3.dp))
+        if (validationErrors.contains("Email tidak boleh kosong")) {
+            Text(
+                text = "*Email tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
 
+        // Nomor Telepon Field
         OutlinedTextField(
             value = insertMembersUiEvent.nomorTelepon,
             onValueChange = { onValueChange(insertMembersUiEvent.copy(nomorTelepon = it)) },
             label = { Text(text = "Nomor Telepon") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Done
+            ),
+            isError = validationErrors.contains("Nomor telepon tidak boleh kosong")
         )
+        Spacer(modifier = Modifier.padding(3.dp))
+        if (validationErrors.contains("Nomor telepon tidak boleh kosong")) {
+            Text(
+                text = "*Nomor telepon tidak boleh kosong",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
 
+        // Button Simpan
         Button(
             onClick = onSaveClick,
             shape = RoundedCornerShape(10.dp),
