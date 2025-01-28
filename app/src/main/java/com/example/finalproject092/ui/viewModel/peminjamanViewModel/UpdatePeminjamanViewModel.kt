@@ -1,5 +1,6 @@
 package com.example.finalproject092.ui.viewModel.peminjamanViewModel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,30 +24,28 @@ class UpdatePeminjamanViewModel(
     var updatePjUiState by mutableStateOf(InsertPjUiState())
         private set
 
+    val idPeminjaman: Int = checkNotNull(savedStateHandle[UpdatePeminjamanDestination.idPj])
+
     var bukuList by mutableStateOf<List<Buku>>(emptyList())
         private set
-    var bookTitles by mutableStateOf<List<String>>(emptyList())
+    var bookTitles by mutableStateOf<String>("")
         private set
 
     var anggotaList by mutableStateOf<List<Anggota>>(emptyList())
         private set
-    var namaAnggota by mutableStateOf<List<String>>(emptyList())
+    var namaAnggota by mutableStateOf<String>("")
         private set
 
-    var selectedBuku by mutableStateOf("")
-
     init {
-        fetchBukuList() // Mengambil daftar buku saat ViewModel diinisialisasi
+        fetchBukuList()
     }
 
     // Fungsi untuk mengambil daftar buku
     private fun fetchBukuList() {
         viewModelScope.launch {
             try {
-                // Ambil daftar buku dari repository
-                bukuList = bukuRepo.getAllBuku()// Misalnya, fungsi ini mengembalikan daftar judul buku
-                bookTitles = bukuList.map { it.judul }
-                selectedBuku = updatePjUiState.insertPjUiEvent.judul
+                bukuList = bukuRepo.getAllBuku()
+                bookTitles = bukuList.find { it.idBuku == idPeminjaman.toString()}?. judul ?: ""
                 updatePjUiState = updatePjUiState.copy(bukuList = bukuList)
 
             } catch (e: Exception) {
@@ -62,8 +61,8 @@ class UpdatePeminjamanViewModel(
     private fun fetchAnggotaList() {
         viewModelScope.launch {
             try {
-                anggotaList = anggotaRepo.getAllAnggota()// Misalnya, fungsi ini mengembalikan daftar judul buku
-                namaAnggota = anggotaList.map { it.nama}
+                anggotaList = anggotaRepo.getAllAnggota()
+                namaAnggota = anggotaList.find { it.idAnggota == idPeminjaman.toString()}?. nama ?: ""
                 updatePjUiState = updatePjUiState.copy(anggotaList = anggotaList)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -72,12 +71,14 @@ class UpdatePeminjamanViewModel(
     }
 
 
-    val idPeminjaman: Int = checkNotNull(savedStateHandle[UpdatePeminjamanDestination.idPj])
+
 
     init {
         viewModelScope.launch {
-            val peminjaman  = peminjamanRepo.getPinjambyId(idPeminjaman)
-                updatePjUiState = peminjaman.toUiStatePj()
+            bukuList = bukuRepo.getAllBuku()
+            anggotaList = anggotaRepo.getAllAnggota()
+
+            updatePjUiState = peminjamanRepo.getPinjambyId(idPeminjaman).toUiStatePj()
         }
     }
 
@@ -88,9 +89,12 @@ class UpdatePeminjamanViewModel(
     suspend fun  updatePeminjamanData(){
         viewModelScope.launch {
             try {
-                peminjamanRepo.updatePinjam(idPeminjaman, updatePjUiState.insertPjUiEvent.toPj().copy(idBuku = selectedBuku))
-            } catch (e: Exception){
-                e.printStackTrace()
+                val peminjaman = peminjamanRepo.getPinjambyId(idPeminjaman)
+
+                Log.d("UpdatePengembalianViewModel", "Data pengembalian untuk idReturn $idPeminjaman ditemukan: $peminjaman")
+                updatePjUiState = peminjaman.toUiStatePj()
+            } catch (e: Exception) {
+                Log.e("UpdatePengembalianViewModel", "Gagal mengambil data pengembalian: ${e.message}")
             }
         }
     }
