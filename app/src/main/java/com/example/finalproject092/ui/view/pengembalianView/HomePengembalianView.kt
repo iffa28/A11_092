@@ -19,19 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,15 +81,6 @@ fun HomeReturnedBookView(
                     viewModel.getReturnBookData()
                 },
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToItemEntry,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(16.dp)
-            ){
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Return the Book")
-            }
         },
     ) { innerPadding ->
         HomeBookStatus(
@@ -228,15 +212,6 @@ fun PengembalianLayout(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            SearchBar(
-                pengembalian = searchPengembalian,
-                onQueryChange = { searchPengembalian = it }, // Update query pencarian
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding( top = 10.dp)
-            )
-        }
         item() {
             PengembalianTable(pengembalian = filteredPengembalian,
                 onDetailClick = onDetailClick,
@@ -247,24 +222,7 @@ fun PengembalianLayout(
 
 }
 
-@Composable
-fun SearchBar(
-    pengembalian: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = pengembalian,
-        onValueChange = onQueryChange,
-        placeholder = { Text("Cari Judul Buku...") },
-        modifier = modifier.border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(4.dp)),
-        singleLine = true,
-    )
-    Spacer(modifier = Modifier.padding(10.dp))
 
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PengembalianTable(
     pengembalian: List<Pengembalian>,
@@ -293,13 +251,12 @@ fun PengembalianTable(
         modifier = Modifier
             .fillMaxWidth()
             .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(12.dp))
-            .padding(8.dp)  // Menambahkan padding sekitar kolom
     ) {
         // Header Tabel
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .background(colorResource(id = R.color.warnatabel), shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {

@@ -1,17 +1,14 @@
 package com.example.finalproject092.ui.view.peminjamanView
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject092.ui.topAppBar.CustomTopBar
 import com.example.finalproject092.ui.viewModel.PenyediaViewModel
-import com.example.finalproject092.ui.viewModel.peminjamanViewModel.InsertPeminjamanViewModel
 import com.example.finalproject092.ui.viewModel.peminjamanViewModel.UpdatePeminjamanViewModel
 import kotlinx.coroutines.launch
 
@@ -24,16 +21,6 @@ fun UpdatePeminjamanScreen(
     updateViewModel: UpdatePeminjamanViewModel = viewModel(factory = PenyediaViewModel.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(updateViewModel.updatePjUiState.insertPjUiEvent.idAnggota) {
-        updateViewModel.updateInsertPjState(updateViewModel.updatePjUiState.insertPjUiEvent)
-        Log.d("UpdatePeminjamanScreen", "Memuat data pengembalian untuk IdAnggota: ${updateViewModel.updatePjUiState.insertPjUiEvent.idAnggota}")
-    }
-
-    LaunchedEffect(updateViewModel.updatePjUiState.insertPjUiEvent.idBuku) {
-        updateViewModel.updateInsertPjState(updateViewModel.updatePjUiState.insertPjUiEvent)
-        Log.d("UpdatePeminjamanScreen", "Memuat data pengembalian untuk IdAnggota: ${updateViewModel.updatePjUiState.insertPjUiEvent.idBuku}")
-    }
-
     Scaffold(
         topBar = {
             CustomTopBar(
